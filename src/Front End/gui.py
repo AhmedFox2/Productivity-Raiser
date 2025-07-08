@@ -8,8 +8,8 @@ from PIL import Image
 
 def extract_icon_from_exe(exe_path,app_name=None):
     try:
-        icoextract.IconExtractor(exe_path).export_icon(program_path.removesuffix("Front End") + "assets\\icons\\"+app_name + ".ico")
-        return Image.open(program_path.removesuffix("Front End") + "assets\\icons\\"+app_name + ".ico")
+        icoextract.IconExtractor(exe_path).export_icon(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico")
+        return Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico")
     except icoextract.NoIconsAvailableError:
         print(f"لا توجد أيقونات متاحة في {exe_path}")
         return None
@@ -43,44 +43,27 @@ def show_allowed_apps():
             print(f"البرنامج {app_name} غير موجود في المسار المحدد: {path}")
             icon_img = extract_icon_from_exe(path,app_name)
 
-        ctk_img = ctk.CTkImage(
-            light_image=Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico"),
-            dark_image=Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico"),
-            size=(64, 64)
-        )
+        ctk_img = ctk.CTkImage(light_image=Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico"), dark_image=Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico"), size=(64, 64))
 
-        # إطار للأيقونة
-        app_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
-        
         btn = ctk.CTkButton(
-            app_frame,
+            content_frame,
             image=ctk_img,
             text="",
-            width=90,
-            height=90,
-            fg_color="#363636",
-            hover_color="#4a9eff",
-            corner_radius=15,
+            width=80,
+            height=80,
+            fg_color="transparent",
+            hover_color="#444",
+            corner_radius=20,
             command=lambda p=path: run_app(p)
         )
-        btn.pack(pady=5)
-        
-        # إضافة اسم التطبيق
-        app_label = ctk.CTkLabel(
-            app_frame,
-            text=app_name,
-            font=("Tajawal", 12),
-            text_color="#8b8b8b"
-        )
-        app_label.pack()
 
         row = i // 5
         col = i % 5
-        app_frame.grid(row=row, column=col, padx=25, pady=25)
+        btn.grid(row=row, column=col, padx=20, pady=20)
 
 # إعداد المظهر
-ctk.set_appearance_mode("dark")  # وضع داكن
-ctk.set_default_color_theme("blue")  # اللون الأساسي أزرق
+ctk.set_appearance_mode("light")  # وضع فاتح
+ctk.set_default_color_theme("green")  # اللون الأساسي أخضر
 
 # النافذة الرئيسية
 app = ctk.CTk()
@@ -88,7 +71,6 @@ app.title("Study Mode Launcher")
 app.attributes("-fullscreen", True)
 app.resizable(False, False)
 app.attributes("-topmost", True)
-app.configure(fg_color="#1a1a1a")  # لون خلفية داكن
 
 # منع Tab و Alt+F4
 keyboard.block_key("tab")
@@ -96,22 +78,21 @@ app.bind("<Alt-F4>", lambda e: "break")
 app.protocol("WM_DELETE_WINDOW", lambda: None)
 
 # إطار رأس الصفحة
-header_frame = ctk.CTkFrame(app, corner_radius=20, fg_color="#2d2d2d")
+header_frame = ctk.CTkFrame(app, corner_radius=20, fg_color="#e6f4ea")
 header_frame.pack(fill="x", pady=20, padx=40)
 
 welcome = ctk.CTkLabel(
     header_frame,
     text="أهلاً بك في وضع الدراسة",
-    font=("Tajawal", 34, "bold"),
-    text_color="#4a9eff"
+    font=("Segoe UI", 34, "bold"),
+    text_color="#2e7d32"
 )
 welcome.pack(pady=10)
 
 info = ctk.CTkLabel(
     header_frame,
     text="لإغلاق، اضغط F12 وأدخل كلمة المرور",
-    font=("Tajawal", 18),
-    text_color="#8b8b8b"
+    font=("Segoe UI", 18)
 )
 info.pack(pady=(0,10))
 
@@ -120,12 +101,11 @@ exit_btn = ctk.CTkButton(
     header_frame,
     text="خروج آمن",
     command=lambda: ask_password(),
-    fg_color="#ff4444",
-    hover_color="#cc0000",
+    fg_color="#d32f2f",
+    hover_color="#b71c1c",
     text_color="white",
     corner_radius=12,
-    width=120,
-    font=("Tajawal", 14, "bold")
+    width=120
 )
 exit_btn.pack(side="right", padx=20)
 exit_btn.pack_forget()
@@ -137,9 +117,9 @@ content_frame = ctk.CTkScrollableFrame(
     app,
     width=1400,
     height=700,
-    fg_color="#2d2d2d",
+    fg_color="transparent",
     corner_radius=20,
-    scrollbar_button_color="#404040"
+    scrollbar_button_color="#ebebeb"
 )
 content_frame.pack(pady=30)
 
@@ -152,65 +132,30 @@ show_allowed_apps()
 def ask_password():
     pwd_win = ctk.CTkToplevel(app)
     pwd_win.title("كلمة المرور")
-    pwd_win.geometry("320x200")
+    pwd_win.geometry("320x180")
     pwd_win.attributes("-topmost", True)
     pwd_win.transient(app)
     pwd_win.grab_set()
-    pwd_win.configure(fg_color="#1a1a1a")
 
-    pwd_frame = ctk.CTkFrame(pwd_win, corner_radius=15, fg_color="#2d2d2d")
-    pwd_frame.pack(fill="both", expand=True, padx=20, pady=20)
-
-    lbl = ctk.CTkLabel(
-        pwd_frame,
-        text="أدخل كلمة المرور:",
-        font=("Tajawal", 16),
-        text_color="#4a9eff"
-    )
+    lbl = ctk.CTkLabel(pwd_win, text="أدخل كلمة المرور:", font=("Segoe UI", 16))
     lbl.pack(pady=(20,10))
 
-    entry = ctk.CTkEntry(
-        pwd_frame,
-        show="*",
-        font=("Segoe UI", 16),
-        width=240,
-        fg_color="#363636",
-        border_color="#4a9eff",
-        text_color="white"
-    )
+    entry = ctk.CTkEntry(pwd_win, show="*", font=("Segoe UI", 16), width=240)
     entry.pack(pady=5)
 
     def check():
         if entry.get() == "1234":
             app.destroy()
         else:
-            error_label = ctk.CTkLabel(
-                pwd_frame,
+            ctk.CTkLabel(
+                pwd_win,
                 text="كلمة السر خاطئة!",
-                text_color="#ff4444",
-                font=("Tajawal", 14)
-            )
-            error_label.pack(pady=5)
-            entry.configure(border_color="#ff4444")
-            pwd_win.after(2000, lambda: [error_label.destroy(), entry.configure(border_color="#4a9eff")])
+                text_color="#d32f2f",
+                font=("Segoe UI", 14)
+            ).pack(pady=5)
 
-    btn = ctk.CTkButton(
-        pwd_frame,
-        text="تأكيد",
-        command=check,
-        width=120,
-        height=35,
-        corner_radius=12,
-        font=("Tajawal", 14, "bold"),
-        fg_color="#4a9eff",
-        hover_color="#2d7bdb"
-    )
+    btn = ctk.CTkButton(pwd_win, text="تأكيد", command=check, width=100, corner_radius=12)
     btn.pack(pady=15)
-
-    # تركيز على حقل الإدخال
-    entry.focus()
-    # ربط مفتاح Enter بزر التأكيد
-    pwd_win.bind("<Return>", lambda e: check())
 
 # تشغيل الواجهة
 app.mainloop()
