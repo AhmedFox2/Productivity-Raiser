@@ -8,8 +8,8 @@ from PIL import Image
 
 def extract_icon_from_exe(exe_path,app_name=None):
     try:
-        icoextract.IconExtractor(exe_path).export_icon(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico")
-        return Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico")
+        icoextract.IconExtractor(exe_path).export_icon(program_path.removesuffix("Front End") + "assets\\icons\\"+app_name + ".ico")
+        return Image.open(program_path.removesuffix("Front End") + "assets\\icons\\"+app_name + ".ico")
     except icoextract.NoIconsAvailableError:
         print(f"لا توجد أيقونات متاحة في {exe_path}")
         return None
@@ -43,23 +43,40 @@ def show_allowed_apps():
             print(f"البرنامج {app_name} غير موجود في المسار المحدد: {path}")
             icon_img = extract_icon_from_exe(path,app_name)
 
-        ctk_img = ctk.CTkImage(light_image=Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico"), dark_image=Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico"), size=(64, 64))
+        ctk_img = ctk.CTkImage(
+            light_image=Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico"),
+            dark_image=Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico"),
+            size=(64, 64)
+        )
 
+        # إطار للأيقونة
+        app_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
+        
         btn = ctk.CTkButton(
-            content_frame,
+            app_frame,
             image=ctk_img,
             text="",
-            width=80,
-            height=80,
-            fg_color="transparent",
-            hover_color="#444",
-            corner_radius=20,
+            width=90,
+            height=90,
+            fg_color="#363636",
+            hover_color="#4a9eff",
+            corner_radius=15,
             command=lambda p=path: run_app(p)
         )
+        btn.pack(pady=5)
+        
+        # إضافة اسم التطبيق
+        app_label = ctk.CTkLabel(
+            app_frame,
+            text=app_name,
+            font=("Tajawal", 12),
+            text_color="#8b8b8b"
+        )
+        app_label.pack()
 
         row = i // 5
         col = i % 5
-        btn.grid(row=row, column=col, padx=20, pady=20)
+        app_frame.grid(row=row, column=col, padx=25, pady=25)
 
 # إعداد المظهر
 appearance_mode = ["dark"]  # قائمة لتخزين الوضع الحالي (قابلة للتغيير داخل الدوال)
@@ -114,6 +131,7 @@ app.title("Study Mode Launcher")
 app.attributes("-fullscreen", True)
 app.resizable(False, False)
 app.attributes("-topmost", True)
+app.configure(fg_color="#1a1a1a")  # لون خلفية داكن
 
 # منع Tab و Alt+F4
 keyboard.block_key("tab")
@@ -121,7 +139,7 @@ app.bind("<Alt-F4>", lambda e: "break")
 app.protocol("WM_DELETE_WINDOW", lambda: None)
 
 # إطار رأس الصفحة
-header_frame = ctk.CTkFrame(app, corner_radius=20, fg_color="#e6f4ea")
+header_frame = ctk.CTkFrame(app, corner_radius=20, fg_color="#2d2d2d")
 header_frame.pack(fill="x", pady=20, padx=40)
 
 # زر تبديل الوضع
@@ -144,15 +162,16 @@ theme_btn.pack(side="left", padx=10)
 welcome = ctk.CTkLabel(
     header_frame,
     text="أهلاً بك في وضع الدراسة",
-    font=("Segoe UI", 34, "bold"),
-    text_color="#2e7d32"
+    font=("Tajawal", 34, "bold"),
+    text_color="#4a9eff"
 )
 welcome.pack(pady=10)
 
 info = ctk.CTkLabel(
     header_frame,
     text="لإغلاق، اضغط F12 وأدخل كلمة المرور",
-    font=("Segoe UI", 18)
+    font=("Tajawal", 18),
+    text_color="#8b8b8b"
 )
 info.pack(pady=(0,10))
 
@@ -161,11 +180,12 @@ exit_btn = ctk.CTkButton(
     header_frame,
     text="خروج آمن",
     command=lambda: ask_password(),
-    fg_color="#d32f2f",
-    hover_color="#b71c1c",
+    fg_color="#ff4444",
+    hover_color="#cc0000",
     text_color="white",
     corner_radius=12,
-    width=120
+    width=120,
+    font=("Tajawal", 14, "bold")
 )
 exit_btn.pack(side="right", padx=20)
 exit_btn.pack_forget()
@@ -177,9 +197,9 @@ content_frame = ctk.CTkScrollableFrame(
     app,
     width=1400,
     height=700,
-    fg_color="transparent",
+    fg_color="#2d2d2d",
     corner_radius=20,
-    scrollbar_button_color="#ebebeb"
+    scrollbar_button_color="#404040"
 )
 content_frame.pack(pady=30)
 
@@ -192,7 +212,7 @@ show_allowed_apps()
 def ask_password():
     pwd_win = ctk.CTkToplevel(app)
     pwd_win.title("كلمة المرور")
-    pwd_win.geometry("320x180")
+    pwd_win.geometry("320x200")
     pwd_win.attributes("-topmost", True)
     pwd_win.transient(app)
     pwd_win.grab_set()
@@ -250,8 +270,8 @@ def ask_password():
         if entry.get() == "1234":
             app.destroy()
         else:
-            ctk.CTkLabel(
-                pwd_win,
+            error_label = ctk.CTkLabel(
+                pwd_frame,
                 text="كلمة السر خاطئة!",
                 text_color=err_color,
                 font=("Tajawal", 14)
