@@ -79,8 +79,51 @@ def show_allowed_apps():
         app_frame.grid(row=row, column=col, padx=25, pady=25)
 
 # إعداد المظهر
-ctk.set_appearance_mode("dark")  # وضع داكن
+appearance_mode = ["dark"]  # قائمة لتخزين الوضع الحالي (قابلة للتغيير داخل الدوال)
+ctk.set_appearance_mode(appearance_mode[0])
 ctk.set_default_color_theme("blue")  # اللون الأساسي أزرق
+
+# دالة لتبديل الوضع
+
+def toggle_appearance():
+    if appearance_mode[0] == "dark":
+        ctk.set_appearance_mode("light")
+        app.configure(fg_color="#f7fafc")
+        header_frame.configure(fg_color="#e3f2fd")
+        content_frame.configure(fg_color="#f7fafc")
+        welcome.configure(text_color="#1976d2")
+        info.configure(text_color="#607d8b")
+        theme_btn.configure(text="☾", fg_color="#1976d2", hover_color="#1565c0")
+        exit_btn.configure(fg_color="#e53935", hover_color="#b71c1c", text_color="white")
+        appearance_mode[0] = "light"
+        theme_btn.configure(text="☾")
+    else:
+        ctk.set_appearance_mode("dark")
+        app.configure(fg_color="#1a1a1a")
+        header_frame.configure(fg_color="#2d2d2d")
+        content_frame.configure(fg_color="#2d2d2d")
+        welcome.configure(text_color="#4a9eff")
+        info.configure(text_color="#8b8b8b")
+        theme_btn.configure(text="☀", fg_color="#4a9eff", hover_color="#2d7bdb")
+        exit_btn.configure(fg_color="#ff4444", hover_color="#cc0000", text_color="white")
+        appearance_mode[0] = "dark"
+        if hasattr(app, "pwd_win") and app.pwd_win.winfo_exists():
+            update_password_window_colors("dark")
+
+# دالة لتحديث ألوان نافذة كلمة المرور حسب الوضع
+
+def update_password_window_colors(mode):
+    win = app.pwd_win
+    frame = win.pwd_frame
+    entry = win.pwd_entry
+    if mode == "light":
+        win.configure(fg_color="#f7fafc")
+        frame.configure(fg_color="#e3f2fd")
+        entry.configure(fg_color="#ffffff", border_color="#1976d2", text_color="#222")
+    else:
+        win.configure(fg_color="#1a1a1a")
+        frame.configure(fg_color="#2d2d2d")
+        entry.configure(fg_color="#363636", border_color="#4a9eff", text_color="white")
 
 # النافذة الرئيسية
 app = ctk.CTk()
@@ -98,6 +141,23 @@ app.protocol("WM_DELETE_WINDOW", lambda: None)
 # إطار رأس الصفحة
 header_frame = ctk.CTkFrame(app, corner_radius=20, fg_color="#2d2d2d")
 header_frame.pack(fill="x", pady=20, padx=40)
+
+# زر تبديل الوضع
+# ☀ للوضع الفاتح، ☾ للوضع الغامق
+
+theme_btn = ctk.CTkButton(
+    header_frame,
+    text="☀",
+    width=50,
+    height=40,
+    fg_color="#4a9eff",
+    hover_color="#2d7bdb",
+    text_color="white",
+    font=("Segoe UI", 20, "bold"),
+    corner_radius=12,
+    command=toggle_appearance
+)
+theme_btn.pack(side="left", padx=10)
 
 welcome = ctk.CTkLabel(
     header_frame,
@@ -156,16 +216,41 @@ def ask_password():
     pwd_win.attributes("-topmost", True)
     pwd_win.transient(app)
     pwd_win.grab_set()
-    pwd_win.configure(fg_color="#1a1a1a")
+    # تخزين النافذة في app
+    app.pwd_win = pwd_win
 
-    pwd_frame = ctk.CTkFrame(pwd_win, corner_radius=15, fg_color="#2d2d2d")
+    # تحديد الألوان حسب الوضع الحالي
+    if appearance_mode[0] == "light":
+        win_bg = "#f7fafc"
+        frame_bg = "#e3f2fd"
+        entry_bg = "#ffffff"
+        border = "#1976d2"
+        txt = "#222"
+        lbl_color = "#1976d2"
+        err_color = "#e53935"
+        btn_fg = "#1976d2"
+        btn_hover = "#1565c0"
+    else:
+        win_bg = "#1a1a1a"
+        frame_bg = "#2d2d2d"
+        entry_bg = "#363636"
+        border = "#4a9eff"
+        txt = "white"
+        lbl_color = "#4a9eff"
+        err_color = "#ff4444"
+        btn_fg = "#4a9eff"
+        btn_hover = "#2d7bdb"
+
+    pwd_win.configure(fg_color=win_bg)
+    pwd_frame = ctk.CTkFrame(pwd_win, corner_radius=15, fg_color=frame_bg)
     pwd_frame.pack(fill="both", expand=True, padx=20, pady=20)
+    pwd_win.pwd_frame = pwd_frame
 
     lbl = ctk.CTkLabel(
         pwd_frame,
         text="أدخل كلمة المرور:",
         font=("Tajawal", 16),
-        text_color="#4a9eff"
+        text_color=lbl_color
     )
     lbl.pack(pady=(20,10))
 
@@ -174,11 +259,12 @@ def ask_password():
         show="*",
         font=("Segoe UI", 16),
         width=240,
-        fg_color="#363636",
-        border_color="#4a9eff",
-        text_color="white"
+        fg_color=entry_bg,
+        border_color=border,
+        text_color=txt
     )
     entry.pack(pady=5)
+    pwd_win.pwd_entry = entry
 
     def check():
         if entry.get() == "1234":
@@ -187,12 +273,12 @@ def ask_password():
             error_label = ctk.CTkLabel(
                 pwd_frame,
                 text="كلمة السر خاطئة!",
-                text_color="#ff4444",
+                text_color=err_color,
                 font=("Tajawal", 14)
             )
             error_label.pack(pady=5)
-            entry.configure(border_color="#ff4444")
-            pwd_win.after(2000, lambda: [error_label.destroy(), entry.configure(border_color="#4a9eff")])
+            entry.configure(border_color=err_color)
+            pwd_win.after(2000, lambda: [error_label.destroy(), entry.configure(border_color=border)])
 
     btn = ctk.CTkButton(
         pwd_frame,
@@ -202,15 +288,12 @@ def ask_password():
         height=35,
         corner_radius=12,
         font=("Tajawal", 14, "bold"),
-        fg_color="#4a9eff",
-        hover_color="#2d7bdb"
+        fg_color=btn_fg,
+        hover_color=btn_hover
     )
     btn.pack(pady=15)
 
-    # تركيز على حقل الإدخال
     entry.focus()
-    # ربط مفتاح Enter بزر التأكيد
     pwd_win.bind("<Return>", lambda e: check())
-
 # تشغيل الواجهة
 app.mainloop()
