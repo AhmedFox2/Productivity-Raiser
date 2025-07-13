@@ -5,23 +5,26 @@ import customtkinter as ctk
 import keyboard
 import icoextract
 from PIL import Image
+from pathlib import Path
+
+src = Path(__file__).resolve().parent.parent
+icons_folder = f"{src}\\assets\\icons"
+json_path = f"{src}\\assets\\database"
+
 
 def extract_icon_from_exe(exe_path,app_name=None):
     try:
-        icoextract.IconExtractor(exe_path).export_icon(program_path.removesuffix("Front End") + "assets\\icons\\"+app_name + ".ico")
-        return Image.open(program_path.removesuffix("Front End") + "assets\\icons\\"+app_name + ".ico")
+        icoextract.IconExtractor(exe_path).export_icon(f"{icons_folder}\\{app_name}.ico")
+        return Image.open(f"{icons_folder}\\{app_name}.ico")
     except icoextract.NoIconsAvailableError:
         print(f"لا توجد أيقونات متاحة في {exe_path}")
         return None
-    
-
-program_path = os.path.dirname(__file__)
 
 # تحميل البرامج المسموحة
 def load_allowed_apps():
-    if not os.path.exists(f"{program_path}/allowed_apps.json"):
+    if not Path(json_path, "allowed_apps.json").exists():
         return []
-    with open(f"{program_path}/allowed_apps.json", "r") as f:
+    with open(f"{json_path}\\allowed_apps.json", "r") as f:
         return json.load(f)
 
 # تشغيل البرنامج
@@ -29,7 +32,7 @@ def run_app(path):
     try:
         app.attributes("-topmost", False)
         subprocess.Popen(path)
-        exit()
+        app.destroy()
     except Exception as e:
         print(f"خطأ في تشغيل البرنامج: {e}")
 
@@ -39,16 +42,19 @@ def show_allowed_apps():
     for i, path in enumerate(apps):
         exe_name = os.path.basename(path)
         app_name = exe_name.removesuffix(".exe")
-        if not os.path.exists(program_path + "/assets/icons/"+ app_name + ".ico"):
-            print(f"البرنامج {app_name} غير موجود في المسار المحدد: {path}")
-            icon_img = extract_icon_from_exe(path,app_name)
+        if not os.path.exists(f"{src}\\assets\\icons\\{app_name}.ico"):
+            print(f"استخراج الأيقونة لـ {app_name} من {path}")
+            
+            extract_icon_from_exe(path,app_name)
+            
+
+        icon_img = Image.open(f"{icons_folder}\\{app_name}.ico")
 
         ctk_img = ctk.CTkImage(
-            light_image=Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico"),
-            dark_image=Image.open(program_path.removesuffix("Front End") + "\\assets\\icons\\"+app_name + ".ico"),
+            light_image=icon_img,
+            dark_image=icon_img,
             size=(64, 64)
         )
-
         # إطار للأيقونة
         app_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
         
@@ -69,7 +75,7 @@ def show_allowed_apps():
         app_label = ctk.CTkLabel(
             app_frame,
             text=app_name,
-            font=("Tajawal", 12),
+            font=cairo_font,
             text_color="#8b8b8b"
         )
         app_label.pack()
@@ -95,6 +101,12 @@ def toggle_appearance():
         info.configure(text_color="#607d8b")
         theme_btn.configure(text="☾", fg_color="#1976d2", hover_color="#1565c0")
         exit_btn.configure(fg_color="#e53935", hover_color="#b71c1c", text_color="white")
+        run_button_color = "#e2e4e6"
+        for widget in content_frame.winfo_children():
+            for button in widget.winfo_children():
+                if isinstance(button, ctk.CTkButton):
+                    button.configure(fg_color=run_button_color)
+
         appearance_mode[0] = "light"
         theme_btn.configure(text="☾")
     else:
@@ -106,6 +118,11 @@ def toggle_appearance():
         info.configure(text_color="#8b8b8b")
         theme_btn.configure(text="☀", fg_color="#4a9eff", hover_color="#2d7bdb")
         exit_btn.configure(fg_color="#ff4444", hover_color="#cc0000", text_color="white")
+        run_button_color = "#363636"
+        for widget in content_frame.winfo_children():
+            for button in widget.winfo_children():
+                if isinstance(button, ctk.CTkButton):
+                    button.configure(fg_color=run_button_color)
         appearance_mode[0] = "dark"
         if hasattr(app, "pwd_win") and app.pwd_win.winfo_exists():
             update_password_window_colors("dark")
@@ -133,6 +150,7 @@ app.resizable(False, False)
 app.attributes("-topmost", True)
 app.configure(fg_color="#1a1a1a")  # لون خلفية داكن
 
+cairo_font = ctk.CTkFont(family=f"{src}\\assets\\fonts\\Cairo-Regular.ttf",size=30,)
 # منع Tab و Alt+F4
 keyboard.block_key("tab")
 app.bind("<Alt-F4>", lambda e: "break")
@@ -187,7 +205,6 @@ exit_btn = ctk.CTkButton(
     width=120,
     font=("Tajawal", 14, "bold")
 )
-exit_btn.pack(side="right", padx=20)
 exit_btn.pack_forget()
 
 app.bind("<F12>", lambda e: exit_btn.pack(side="right", padx=20))
@@ -295,5 +312,6 @@ def ask_password():
 
     entry.focus()
     pwd_win.bind("<Return>", lambda e: check())
+
 # تشغيل الواجهة
 app.mainloop()
