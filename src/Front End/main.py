@@ -28,6 +28,13 @@ class App(ctk.CTk):
 
         self.set_dark_theme()
 
+        self.main_frame = ctk.CTkFrame(self.home_page,width=700,height=70)
+        self.main_frame.pack()
+    def clear_ui(self):
+        """Clear the current UI elements."""
+        for widget in self.winfo_children():
+            widget.destroy()
+
     def set_dark_theme(self):
         ctk.set_appearance_mode("dark")
         self.configure(fg_color="#1a1a1a")

@@ -12,7 +12,7 @@ icons_folder = src / "assets" / "icons"
 json_path = src / "assets" / "database"
 font_path = src / "assets" / "fonts" / "Cairo-Regular.ttf"
 
-parentearance_mode = ["dark"]
+appearance_mode = ["dark"]
 
 class HomePage(ctk.CTkFrame):
     def __init__(self, master):
@@ -29,7 +29,7 @@ class HomePage(ctk.CTkFrame):
         self.theme_btn = ctk.CTkButton(self.header_frame, text="☀", width=50, height=40,
                                        fg_color="#4a9eff", hover_color="#2d7bdb",
                                        text_color="white", font=("Segoe UI", 20, "bold"),
-                                       corner_radius=12, command=self.toggle_parentearance)
+                                       corner_radius=12, command=self.toggle_appearance)
         self.theme_btn.pack(side="left", padx=10)
 
         self.welcome = ctk.CTkLabel(self.header_frame, text="أهلاً بك في وضع الدراسة",
@@ -69,26 +69,26 @@ class HomePage(ctk.CTkFrame):
             icon_img = Image.open(icon_path)
             ctk_img = ctk.CTkImage(light_image=icon_img, dark_image=icon_img, size=(64, 64))
 
-            parent_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+            app_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
 
-            btn = ctk.CTkButton(parent_frame, image=ctk_img, text="", width=90, height=90,
+            btn = ctk.CTkButton(app_frame, image=ctk_img, text="", width=90, height=90,
                                 fg_color="#363636", hover_color="#4a9eff", corner_radius=15,
                                 command=lambda p=path: self.run_app(p))
             btn.pack(pady=5)
 
-            label = ctk.CTkLabel(parent_frame, text=app_name, font=self.cairo_font, text_color="#8b8b8b")
+            label = ctk.CTkLabel(app_frame, text=app_name, font=self.cairo_font, text_color="#8b8b8b")
             label.pack()
 
             row = i // 5
             col = i % 5
-            parent_frame.grid(row=row, column=col, padx=25, pady=25)
+            app_frame.grid(row=row, column=col, padx=25, pady=25)
 
-    def toggle_parentearance(self):
-        if parentearance_mode[0] == "dark":
-            parentearance_mode[0] = "light"
+    def toggle_appearance(self):
+        if appearance_mode[0] == "dark":
+            appearance_mode[0] = "light"
             self.parent.set_light_theme()
         else:
-            parentearance_mode[0] = "dark"
+            appearance_mode[0] = "dark"
             self.parent.set_dark_theme()
 
     def ask_password(self):
