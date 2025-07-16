@@ -40,15 +40,6 @@ class HomePage(ctk.CTkFrame):
                                  font=("Tajawal", 18), text_color="#8b8b8b")
         self.info.pack(pady=(0, 10))
 
-        self.exit_btn = ctk.CTkButton(self.header_frame, text="خروج آمن",
-                                      command=self.ask_password,
-                                      fg_color="#ff4444", hover_color="#cc0000",
-                                      text_color="white", corner_radius=12, width=120,
-                                      font=("Tajawal", 14, "bold"))
-        self.exit_btn.pack_forget()
-
-        self.parent.bind("<F12>", lambda e: self.exit_btn.pack(side="right", padx=20))
-
         # إنشاء إطار وسطي للمحتوى
         self.middle_container = ctk.CTkFrame(self, fg_color="transparent")
         self.middle_container.pack(expand=True, fill="both")
@@ -122,9 +113,6 @@ class HomePage(ctk.CTkFrame):
         else:
             appearance_mode[0] = "dark"
             self.parent.set_dark_theme()
-
-    def ask_password(self):
-        PasswordWindow(self.parent)
 
     def update_button_colors(self, color):
         for widget in self.content_frame.winfo_children():
