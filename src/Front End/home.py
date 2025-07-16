@@ -22,7 +22,6 @@ class HomePage(ctk.CTkFrame):
 
     def build_ui(self):
         self.cairo_font = ctk.CTkFont(family=str(font_path), size=30)
-
         self.header_frame = ctk.CTkFrame(self, corner_radius=20, fg_color="#2d2d2d")
         self.header_frame.pack(fill="x", padx=20, pady=(20, 10))
 
@@ -53,6 +52,7 @@ class HomePage(ctk.CTkFrame):
         )
         
         self.show_allowed_apps()
+        self.set_dark_theme()
 
     def show_allowed_apps(self):
         apps = load_allowed_apps()
@@ -109,10 +109,10 @@ class HomePage(ctk.CTkFrame):
     def toggle_appearance(self):
         if appearance_mode[0] == "dark":
             appearance_mode[0] = "light"
-            self.parent.set_light_theme()
+            self.set_light_theme()
         else:
             appearance_mode[0] = "dark"
-            self.parent.set_dark_theme()
+            self.set_dark_theme()
 
     def update_button_colors(self, color):
         for widget in self.content_frame.winfo_children():
@@ -124,3 +124,27 @@ class HomePage(ctk.CTkFrame):
         self.parent.attributes("-topmost", False)
         subprocess.Popen(path)
         self.parent.destroy()
+
+    def set_dark_theme(self):
+        ctk.set_appearance_mode("dark")
+        bg_color = "#1a1a1a"
+        header_color = "#2d2d2d"
+        self.configure(fg_color=bg_color)
+        self.header_frame.configure(fg_color=header_color)
+        self.content_frame.configure(fg_color=bg_color, scrollbar_button_color=bg_color)
+        self.welcome.configure(text_color="#4a9eff")
+        self.info.configure(text_color="#8b8b8b")
+        self.theme_btn.configure(text="☀", fg_color="#4a9eff", hover_color="#2d7bdb")
+        self.update_button_colors("#363636")
+
+    def set_light_theme(self):
+        ctk.set_appearance_mode("light")
+        bg_color = "#f7fafc"
+        header_color = "#e3f2fd"
+        self.configure(fg_color=bg_color)
+        self.header_frame.configure(fg_color=header_color)
+        self.content_frame.configure(fg_color=bg_color, scrollbar_button_color=bg_color)
+        self.welcome.configure(text_color="#1976d2")
+        self.info.configure(text_color="#607d8b")
+        self.theme_btn.configure(text="☾", fg_color="#1976d2", hover_color="#1565c0")
+        self.update_button_colors("#e2e4e6")
